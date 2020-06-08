@@ -35,32 +35,36 @@
                     <div class="panel-body">
                         {{#options}}
                         <div class="form-group input-{{inputType}}">
-                            <label for="{{name}}" class="col-sm-2 control-label">{{label}}</label>
+                            {{#if (eq type "display_text")}}
+                                <p>{{label}}</p>
+                            {{else}}
+                                <label for="{{name}}" class="col-sm-2 control-label">{{label}}</label>
+                            
+                                <div class="col-sm-10">
 
-                            <div class="col-sm-10">
+                                    {{#if choices}}
+                                    <select id="{{name}}" name="{{name}}" required class="form-control" {{{attributes}}}>
+                                        {{#choices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/choices}}
+                                    </select>
+                                    {{else if (eq inputType "checkbox")}}
+                                    <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control auto-width" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
+                                    {{else}}
+                                    <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
+                                    {{/if}}
 
-                                {{#if choices}}
-                                <select id="{{name}}" name="{{name}}" required class="form-control" {{{attributes}}}>
-                                    {{#choices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/choices}}
-                                </select>
-                                {{else if (eq inputType "checkbox")}}
-                                <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control auto-width" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
-                                {{else}}
-                                <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
-                                {{/if}}
+                                    {{#if helpLink}}
+                                    <span class="help-block help-block--link">{{{helpLink}}}</span>
+                                    {{/if}}
 
-                                {{#if helpLink}}
-                                <span class="help-block help-block--link">{{{helpLink}}}</span>
-                                {{/if}}
+                                    {{#if example}}
+                                    <span class="help-block help-block--example">{{t 'form_input_example' example}}</span>
+                                    {{/if}}
 
-                                {{#if example}}
-                                <span class="help-block help-block--example">{{t 'form_input_example' example}}</span>
-                                {{/if}}
-
-                                {{#if helpText}}
-                                <span class="help-block">{{{helpText}}}</span>
-                                {{/if}}
-                            </div>
+                                    {{#if helpText}}
+                                    <span class="help-block">{{{helpText}}}</span>
+                                    {{/if}}
+                                </div>
+                            {{/if}}
                         </div>
                         {{/options}}
                     </div>

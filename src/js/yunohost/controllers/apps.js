@@ -372,24 +372,58 @@
     });
 
     app.post('#/apps/:app/config', function(c) {
-        // taken from app install
-        $.each(c.params, function(k, v) {
-            if (typeof(v) === 'object' && Array.isArray(v)) {
-                // And return only first value
-                c.params[k] = v[0];
+        formData = new FormData(c.target);
+		function pFileReader(file, arg_name) {
+			return new Promise((resolve, reject) => {
+				var fr = new FileReader();  
+				fr.onerror = reject;
+				fr.onload = () => {
+					resolve({
+						'arg_name':arg_name,
+						'name':file.name,
+						'content':fr.result.replace(/data:[^;]*;base64,/, '')
+					});
+				};
+				fr.readAsDataURL(file);
+			});
+		}
+
+		promises = [];
+        for (var input of c.target) {
+            if (input.type == 'file') {
+				var file = formData.get(input.name);
+				promises.push(pFileReader(file, input.name));
             }
-        });
-
-        var app_id = c.params['app'];
-        delete c.params['app'];
-
-        var params = {
-            'args': c.serialize(c.params.toHash())
         }
+        
+        Promise.all(promises).then((files) => {
+            
+			// taken from app install
+            $.each(c.params, function(k, v) {
+                if (typeof(v) === 'object' && Array.isArray(v)) {
+                    // And return only first value
+                    c.params[k] = v[0];
+                }
+            });
 
-        c.api('POST', '/apps/'+app_id+'/config', params, function() {
-            c.redirect_to('#/apps/'+app_id+'/config-panel', {slide:false});
-        });
+            var app_id = c.params['app'];
+            delete c.params['app'];
+        	
+			for (var file of files) {
+				c.params[file['arg_name']] = file['content'];
+				c.params[file['arg_name']+'[name]'] = file['name'];
+			}
+
+            var params = {
+                'args': c.serialize(c.params.toHash())
+            }
+
+            c.api('POST', '/apps/'+app_id+'/config', params, function() {
+                c.redirect_to('#/apps/'+app_id+'/config-panel', {slide:false});
+            });
+        })
+		.catch(error => {
+		});
     })
 
     // Helper function that formats YunoHost style arguments for generating a form
@@ -535,6 +569,9 @@
             if (args[k].type == "display_text") {
                 args[k].isDisplayText = true;
                 args[k].label = args[k].label.split("\n");
+            }
+            if (args[k].type == 'file') {
+                args[k].inputType = 'file';
             }
 
         });
