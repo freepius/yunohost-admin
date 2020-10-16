@@ -739,6 +739,16 @@ input[type='radio'].nice-radio {
     white-space: normal;
 }
 
+/** Config Panel View **/
+.app-config-panel {
+    .section-title {
+        border-bottom: 1px solid #ccc;
+        font-size: 22px;
+    }
+    input[type="file"]:not([data-selected="true"]) + button[data-action="remove"] {
+        display: none;
+    }
+}
 
 /** Groups View **/
 #view-groups {

@@ -12,7 +12,7 @@
 
 {{#if config_panel}}
 
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div class="panel-group app-config-panel" id="accordion" role="tablist" aria-multiselectable="true">
 {{#config_panel}}
 <h2>{{../app_name}} configuration panel</h2>
 <hr>
@@ -30,44 +30,61 @@
         <div id="collapse-{{ @index }}" class="panel-collapse collapse {{#if (eq @index 0)}}in{{/if}}" role="tabpanel" aria-labelledby="heading-{{ @index }}">
             <div class="panel-body">
                 {{#sections}}
-                <div class="panel panel-default">
-                    <div class="panel-heading"><h3 class="panel-title">{{name}} <small>{{help}}</small></h3></div>
-                    <div class="panel-body">
-                        {{#options}}
-                        <div class="form-group input-{{inputType}}">
-                            {{#if (eq type "display_text")}}
-                                <p>{{label}}</p>
-                            {{else}}
-                                <label for="{{name}}" class="col-sm-2 control-label">{{label}}</label>
-                            
-                                <div class="col-sm-10">
+                <div class="co-sm-12">
+                    {{#if name}}
+                        <h3 class="section-title">{{name}} <small>{{help}}</small></h3>
+                    {{/if}}
+                    {{#options}}
+                    <div class="form-group input-{{inputType}}">
+                        {{#if isDisplayText}}
+                            <div class="col-sm-12">
+                                <div class="alert alert-{{type}}" role="alert">
+                                    {{{label}}}
+                                </div>
+                                {{#if helpLink}}
+                                <span class="help-block help-block--link">{{{helpLink}}}</span>
+                                {{/if}}
+                            </div>
+                        {{else}}
+                            <label for="{{name}}" class="col-sm-2 control-label">{{label}}</label>
+                        
+                            <div class="col-sm-10">
 
-                                    {{#if choices}}
-                                    <select id="{{name}}" name="{{name}}" required class="form-control" {{{attributes}}}>
-                                        {{#choices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/choices}}
-                                    </select>
-                                    {{else if (eq inputType "checkbox")}}
-                                    <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control auto-width" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
-                                    {{else}}
-                                    <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
-                                    {{/if}}
-
-                                    {{#if helpLink}}
-                                    <span class="help-block help-block--link">{{{helpLink}}}</span>
-                                    {{/if}}
-
-                                    {{#if example}}
-                                    <span class="help-block help-block--example">{{t 'form_input_example' example}}</span>
-                                    {{/if}}
-
-                                    {{#if helpText}}
-                                    <span class="help-block">{{{helpText}}}</span>
+                                {{#if choices}}
+                                <select id="{{name}}" name="{{name}}" required class="form-control" {{{attributes}}}>
+                                    {{#choices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/choices}}
+                                </select>
+                                {{else if (eq inputType "checkbox")}}
+                                <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control auto-width" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
+                                {{else if (eq inputType "file")}}
+                                <div style="width:100%">
+                                    <input type="{{inputType}}" id="{{name}}" name="{{name}}" value="{{default}}" class="custom-file-input" {{required}} {{{attributes}}} style="display: inline-block" data-selected="false">
+                                    {{#if required}}
+                                        <button data-action="remove" data-target="#{{name}}">
+                                            <span class="fa-close"></span>
+                                            <span class="sr-only">Supprimer</span>
+                                        </button>
                                     {{/if}}
                                 </div>
-                            {{/if}}
-                        </div>
-                        {{/options}}
+                                {{else}}
+                                <input type="{{inputType}}" id="{{name}}" name="{{name}}" class="form-control" value="{{default}}" placeholder="{{example}}" {{required}} {{{attributes}}}>
+                                {{/if}}
+
+                                {{#if helpLink}}
+                                <span class="help-block help-block--link">{{{helpLink}}}</span>
+                                {{/if}}
+
+                                {{#if example}}
+                                <span class="help-block help-block--example">{{t 'form_input_example' example}}</span>
+                                {{/if}}
+
+                                {{#if helpText}}
+                                <span class="help-block">{{{helpText}}}</span>
+                                {{/if}}
+                            </div>
+                        {{/if}}
                     </div>
+                    {{/options}}
                 </div>
                 {{/sections}}
 

@@ -367,7 +367,13 @@
                     formatYunoHostStyleArguments(section.options, c.params);
                 });
             });
-            c.view('app/app_config-panel', data);
+            c.view('app/app_config-panel', data, function () {
+                $.each(data.config_panel.panel, function(_, panel) {
+                    $.each(panel.sections, function(_, section) {
+                        bindYunoHostArguments(section.options, c.params);
+                    });
+                });
+            });
         });
     });
 
@@ -426,6 +432,18 @@
 		});
     })
 
+    function bindYunoHostArguments(args, params) {
+        if (!args) {
+            return;
+        }
+        $("input.custom-file-input[type='file']").change(function(){
+            $( this ).attr('data-selected', 'true');
+        });
+        $("input.custom-file-input[type='file'] + button[data-action='remove']").click(function(){
+            $($( this ).attr('data-target')).val('').clone(true);
+            $($( this ).attr('data-target')).attr('data-selected', 'false');
+        });
+    }
     // Helper function that formats YunoHost style arguments for generating a form
     function formatYunoHostStyleArguments(args, params) {
         if (!args) {
@@ -443,7 +461,18 @@
             args[k].required = (typeof v.optional !== 'undefined' && (v.optional == "true" || v.optional == true)) ? '' : 'required';
             args[k].attributes = "";
             args[k].helpText = "";
-            args[k].helpLink = "";
+            args[k].helpLink = (typeof v.helpLink !== 'undefined') ? v.helpLink : "";
+
+            // Validator
+            if (typeof args[k].pattern !== 'undefined') {
+                args[k].attributes = ' pattern="'+args[k].pattern+'"';
+            }
+            if (typeof args[k].min !== 'undefined') {
+                args[k].attributes = ' min="'+args[k].min+'"';
+            }
+            if (typeof args[k].max !== 'undefined') {
+                args[k].attributes = ' max="'+args[k].max+'"';
+            }
 
             // Multilingual label
             if (typeof args[k].ask === "string")
@@ -539,7 +568,7 @@
                 // Checked or not ?
                 if (typeof args[k].default !== 'undefined') {
                     if (args[k].default == true) {
-                        args[k].attributes = 'checked="checked"';
+                        args[k].attributes = ' checked="checked"';
                     }
                 }
 
@@ -566,12 +595,15 @@
                 args[k].isPassword = true;
             }
 
-            if (args[k].type == "display_text") {
-                args[k].isDisplayText = true;
+            if (['success', 'info', 'warning', 'error'].indexOf(args[k].type) > -1) {
+                args[k].isDisplayText = "true";
                 args[k].label = args[k].label.split("\n");
             }
-            if (args[k].type == 'file') {
-                args[k].inputType = 'file';
+
+            htmlTypes = ['file', 'number', 'password', 'checkbox', 'time',
+                'color', 'date', 'email', 'radio', 'url', 'range']
+            if (htmlTypes.indexOf(args[k].type) > -1) {
+                args[k].inputType = args[k].type;
             }
 
         });
