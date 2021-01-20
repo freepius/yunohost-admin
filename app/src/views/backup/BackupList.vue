@@ -1,16 +1,14 @@
 <template>
-  <div class="backup-list">
-    <div class="actions">
-      <div class="buttons ml-auto">
-        <b-button variant="success" :to="{ name: 'backup-create' }">
-          <icon iname="plus" /> {{ $t('backup_new') }}
-        </b-button>
-      </div>
-    </div>
+  <view-base :queries="queries" @queries-response="formatBackupList" skeleton="list-group-skeleton">
+    <template #top>
+      <top-bar :button="{ text: $t('backup_new'), icon: 'plus', to: { name: 'backup-create' } }" />
+    </template>
 
-    <b-alert v-if="!archives" variant="warning" show>
-      <icon iname="exclamation-triangle" /> {{ $t('backups_no') }}
+    <b-alert v-if="!archives" variant="warning">
+      <icon iname="exclamation-triangle" />
+      {{ $t('items_verbose_count', { items: $tc('items.backups', 0) }) }}
     </b-alert>
+
     <b-list-group v-else>
       <b-list-group-item
         v-for="{ name, created_at, path, size } in archives" :key="name"
@@ -19,20 +17,21 @@
         class="d-flex justify-content-between align-items-center pr-0"
       >
         <div>
-          <h5>
+          <h5 class="font-weight-bold">
             {{ created_at | distanceToNow }}
-            <small>{{ name }} ({{ size | humanSize }})</small>
+            <small class="text-secondary">{{ name }} ({{ size | humanSize }})</small>
           </h5>
-          <p class="mb-0">{{ path }}</p>
+          <p class="mb-0">
+            {{ path }}
+          </p>
         </div>
         <icon iname="chevron-right" class="lg fs-sm ml-auto" />
       </b-list-group-item>
     </b-list-group>
-  </div>
+  </view-base>
 </template>
 
 <script>
-import api from '@/api'
 import { distanceToNow, readableDate } from '@/helpers/filters/date'
 import { humanSize } from '@/helpers/filters/human'
 
@@ -40,15 +39,27 @@ export default {
   name: 'BackupList',
 
   props: {
-    id: {
-      type: String,
-      required: true
-    }
+    id: { type: String, required: true }
   },
 
   data () {
     return {
+      queries: ['backup/archives?with_info'],
       archives: undefined
+    }
+  },
+
+  methods: {
+    formatBackupList (data) {
+      const archives = Object.entries(data.archives)
+      if (archives.length) {
+        this.archives = archives.map(([name, infos]) => {
+          infos.name = name
+          return infos
+        }).reverse()
+      } else {
+        this.archives = null
+      }
     }
   },
 
@@ -56,22 +67,6 @@ export default {
     distanceToNow,
     readableDate,
     humanSize
-  },
-
-  methods: {
-    fetchData () {
-      api.get('backup/archives?with_info').then(({ archives }) => {
-        // FIXME use archives = null if no archives
-        this.archives = Object.entries(archives).map(([name, data]) => {
-          data.name = name
-          return data
-        }).reverse()
-      })
-    }
-  },
-
-  created () {
-    this.fetchData()
   }
 }
 </script>

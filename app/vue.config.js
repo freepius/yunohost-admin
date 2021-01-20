@@ -4,6 +4,7 @@ const dateFnsLocales = [
   'ar',
   'bn', // for 'bn_BD'
   'ca', // for 'ca' & 'oc'
+  'cs',
   'de',
   'el',
   'en-GB', // for 'en' & 'ne'
@@ -51,8 +52,10 @@ module.exports = {
       }
     }
   },
+  publicPath: '/yunohost/admin',
   devServer: {
     https: true,
+    disableHostCheck: true,
     proxy: {
       '^/yunohost': {
         target: `https://${process.env.VUE_APP_IP}`,

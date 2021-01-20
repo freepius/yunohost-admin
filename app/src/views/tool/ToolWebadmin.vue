@@ -1,12 +1,7 @@
 <template>
-  <card-form
-    :title="$t('tools_webadmin_settings')" icon="cog"
-    no-footer
-  >
+  <card-form :title="$t('tools_webadmin_settings')" icon="cog" no-footer>
     <template v-for="(field, fname) in fields">
-      <form-field
-        v-bind="field" v-model="self[fname]" :key="fname"
-      />
+      <form-field v-bind="field" v-model="self[fname]" :key="fname" />
       <hr :key="fname + 'hr'">
     </template>
   </card-form>
@@ -40,13 +35,14 @@ export default {
 
       fields: {
         locale: {
-          label: this.$i18n.t('tools_webadmin.locale'),
+          label: this.$i18n.t('tools_webadmin.language'),
           component: 'SelectItem',
           props: { id: 'locale', choices: [] }
         },
 
         fallbackLocale: {
-          label: this.$i18n.t('tools_webadmin.fallback_locale'),
+          label: this.$i18n.t('tools_webadmin.fallback_language'),
+          description: this.$i18n.t('tools_webadmin.fallback_language_description'),
           component: 'SelectItem',
           props: { id: 'fallback-locale', choices: [] }
         },

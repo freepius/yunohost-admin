@@ -1,18 +1,14 @@
 <template>
-  <div class="tool-logs">
-    <div class="actions">
-      <b-input-group>
-        <b-input-group-prepend is-text>
-          <icon iname="search" />
-        </b-input-group-prepend>
-        <b-form-input id="search-logs" v-model="search" :placeholder="$t('search.logs')" />
-      </b-input-group>
-    </div>
-
-    <b-card no-body v-if="operations">
-      <template v-slot:header>
-        <h2><icon iname="wrench" /> {{ $t('logs_operation') }}</h2>
-      </template>
+  <view-search
+    :search.sync="search"
+    :items="operations"
+    :filtered-items="filteredOperations"
+    items-name="logs"
+    :queries="queries"
+    @queries-response="formatLogsData"
+    skeleton="card-list-skeleton"
+  >
+    <card :title="$t('logs_operation')" icon="wrench" no-body>
       <b-list-group flush>
         <b-list-group-item
           v-for="log in filteredOperations" :key="log.name"
@@ -24,20 +20,19 @@
           {{ log.description }}
         </b-list-group-item>
       </b-list-group>
-    </b-card>
-  </div>
+    </card>
+  </view-search>
 </template>
 
 <script>
-import api from '@/api'
 import { distanceToNow, readableDate } from '@/helpers/filters/date'
 
-
 export default {
-  name: 'ServiceList',
+  name: 'ToolLogs',
 
-  data: function () {
+  data () {
     return {
+      queries: [`logs?limit=${25}&with_details`],
       search: '',
       operations: undefined
     }
@@ -47,39 +42,34 @@ export default {
     filteredOperations () {
       if (!this.operations) return
       const search = this.search.toLowerCase()
-      return this.operations.filter(({ description }) => {
+      const operations = this.operations.filter(({ description }) => {
         return description.toLowerCase().includes(search)
       })
+      return operations.length ? operations : null
+    }
+  },
+
+  methods: {
+    formatLogsData ({ operation }) {
+      operation.forEach((log, index) => {
+        if (log.success === '?') {
+          operation[index].icon = 'question'
+          operation[index].class = 'warning'
+        } else if (log.success) {
+          operation[index].icon = 'check'
+          operation[index].class = 'success'
+        } else {
+          operation[index].icon = 'close'
+          operation[index].class = 'danger'
+        }
+      })
+      this.operations = operation
     }
   },
 
   filters: {
     distanceToNow,
     readableDate
-  },
-
-  methods: {
-    fetchData () {
-      api.get(`logs?limit=${25}&with_details`).then(({ operation }) => {
-        operation.forEach((log, index) => {
-          if (log.success === '?') {
-            operation[index].icon = 'question'
-            operation[index].class = 'warning'
-          } else if (log.success) {
-            operation[index].icon = 'check'
-            operation[index].class = 'success'
-          } else {
-            operation[index].icon = 'close'
-            operation[index].class = 'danger'
-          }
-        })
-        this.operations = operation
-      })
-    }
-  },
-
-  created () {
-    this.fetchData()
   }
 }
 </script>

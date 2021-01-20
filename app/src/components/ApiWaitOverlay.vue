@@ -8,9 +8,8 @@
 
     <template v-slot:overlay>
       <b-card no-body>
-        <div v-if="!error" class="d-flex justify-content-center mt-3">
-          <!-- <b-spinner /> -->
-          <img class="pacman" src="@/assets/ajax-loader.gif">
+        <div v-if="!error" class="mt-3 px-3">
+          <div class="custom-spinner" :class="spinner" />
         </div>
 
         <b-card-body v-if="error">
@@ -31,17 +30,7 @@
           </b-progress>
         </b-card-body>
 
-        <!-- MESSAGES -->
-        <b-list-group v-if="messages" flush class="rounded-0">
-          <b-list-group-item
-            v-for="({ text, type }, i) in messages" :key="i"
-            :variant="type"
-          >
-            {{ text }}
-          </b-list-group-item>
-        </b-list-group>
-
-        <b-card-footer v-if="error">
+        <b-card-footer v-if="error" class="justify-content-end">
           <b-button variant="primary" v-t="'ok'" @click="$store.dispatch('SERVER_RESPONDED', true)" />
         </b-card-footer>
       </b-card>
@@ -57,7 +46,7 @@ export default {
   name: 'ApiWaitOverlay',
 
   computed: {
-    ...mapGetters(['waiting', 'lastAction', 'error']),
+    ...mapGetters(['waiting', 'lastAction', 'error', 'spinner']),
 
     progress () {
       if (!this.lastAction) return null
@@ -66,12 +55,6 @@ export default {
       return {
         values: progress, max: progress.reduce((sum, value) => (sum + value), 0)
       }
-    },
-
-    messages () {
-      if (!this.lastAction) return null
-      const messages = this.lastAction.messages
-      return messages.length > 0 ? this.lastAction.messages : null
     }
   },
 
@@ -105,24 +88,50 @@ export default {
   margin-top: 2rem;
 }
 
-.list-group {
-  max-height: 50vh;
-  overflow-y: auto;
+.custom-spinner {
+  animation: 4s linear infinite;
+  background-repeat: no-repeat;
 
-  // Hide all message except the last one if the mouse isn't hovering the list group.
-  &:not(:hover) .list-group-item:not(:last-of-type) {
-    display: none;
+  &.pacman {
+    height: 24px;
+    width: 24px;
+    background-image: url('../assets/spinners/pacman.gif');
+    animation-name: back-and-forth-pacman;
+
+    @keyframes back-and-forth-pacman {
+      0%, 100% { transform: scale(1); margin-left: 0; }
+      49% { transform: scale(1); margin-left: calc(100% - 24px);}
+      50% { transform: scale(-1); margin-left: calc(100% - 24px);}
+      99% { transform: scale(-1); margin-left: 0;}
+    }
   }
-}
 
-.pacman {
-  animation: back-and-forth 4s linear infinite;
+  &.magikarp {
+    height: 32px;
+    width: 32px;
+    background-image: url('../assets/spinners/magikarp.gif');
+    animation-name: back-and-forth-magikarp;
 
-  @keyframes back-and-forth {
-    0%, 100% { transform: translateX(-50vw) scale(1); }
-    49% { transform: translateX(50vw) scale(1); }
-    50% { transform: translateX(50vw) scale(-1); }
-    99% { transform: translateX(-50vw) scale(-1); }
+    @keyframes back-and-forth-magikarp {
+      0%, 100% { transform: scale(1, 1); margin-left: 0; }
+      49% { transform: scale(1, 1); margin-left: calc(100% - 32px);}
+      50% { transform: scale(-1, 1); margin-left: calc(100% - 32px);}
+      99% { transform: scale(-1, 1); margin-left: 0;}
+    }
+  }
+
+  &.nyancat {
+    height: 40px;
+    width: 100px;
+    background-image: url('../assets/spinners/nyancat.gif');
+    animation-name: back-and-forth-nyancat;
+
+    @keyframes back-and-forth-nyancat {
+      0%, 100% { transform: scale(1, 1); margin-left: 0; }
+      49% { transform: scale(1, 1); margin-left: calc(100% - 100px);}
+      50% { transform: scale(-1, 1); margin-left: calc(100% - 100px);}
+      99% { transform: scale(-1, 1); margin-left: 0;}
+    }
   }
 }
 </style>

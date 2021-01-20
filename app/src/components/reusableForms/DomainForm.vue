@@ -43,6 +43,7 @@
         </template>
       </form-field>
     </b-collapse>
+    <div v-if="dynDnsForbiden" class="alert alert-warning mt-2" v-html="$t('domain_add_dyndns_forbidden')" />
   </card-form>
 </template>
 
@@ -51,10 +52,8 @@ import { mapGetters } from 'vuex'
 import { validationMixin } from 'vuelidate'
 
 import AdressInputSelect from '@/components/AdressInputSelect'
-
 import { formatFormDataValue } from '@/helpers/yunohostArguments'
-import { required, domain, domainLocalPart } from '@/helpers/validators'
-
+import { required, domain, dynDomain } from '@/helpers/validators'
 
 export default {
   name: 'DomainForm',
@@ -123,7 +122,7 @@ export default {
       selected: { required },
       form: {
         domain: this.selected === 'domain' ? { required, domain } : {},
-        dynDomain: { localPart: this.selected === 'dynDomain' ? { required, domainLocalPart } : {} }
+        dynDomain: { localPart: this.selected === 'dynDomain' ? { required, dynDomain } : {} }
       }
     }
   },
@@ -139,12 +138,9 @@ export default {
   },
 
   created () {
-    if (this.noStore) return
-    this.$store.dispatch('FETCH', { uri: 'domains' }).then(() => {
-      if (this.dynDnsForbiden) {
-        this.selected = 'domain'
-      }
-    })
+    if (this.dynDnsForbiden) {
+      this.selected = 'domain'
+    }
   },
 
   mixins: [validationMixin],

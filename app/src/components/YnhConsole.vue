@@ -2,7 +2,15 @@
   <div id="console">
     <b-list-group>
       <!-- HISTORY BAR -->
-      <b-list-group-item class="d-flex align-items-center" :class="{ 'bg-best text-white': open }">
+      <b-list-group-item
+        class="d-flex align-items-center"
+        :class="{ 'bg-best text-white': open }"
+        ref="history-button"
+        role="button" tabindex="0"
+        :aria-expanded="open ? 'true' : 'false'" aria-controls="console-collapse"
+        @mousedown.left.prevent="onHistoryBarClick"
+        @keyup.enter.space.prevent="open = !open"
+      >
         <h6 class="m-0">
           <icon iname="history" /> {{ $t('history.title') }}
         </h6>
@@ -13,23 +21,19 @@
             <u v-t="'history.last_action'" />
             {{ lastAction.uri | readableUri }} ({{ $t('history.methods.' + lastAction.method) }})
           </small>
-
-          <b-button
-            v-b-toggle:console-collapse
-            class="ml-2 px-1 py-0" size="sm" :variant="open ? 'light' : 'outline-dark'"
-          >
-            <icon iname="chevron-right" /><span class="sr-only">{{ $t('words.collapse') }}</span>
-          </b-button>
         </div>
       </b-list-group-item>
 
       <!-- ACTION LIST -->
       <b-collapse id="console-collapse" v-model="open">
-        <b-list-group-item class="p-0" id="history" ref="history">
+        <b-list-group-item
+          id="history" ref="history"
+          class="p-0" :class="{ 'show-last': openedByWaiting }"
+        >
           <!-- ACTION -->
           <b-list-group v-for="(action, i) in history" :key="i" flush>
             <!-- ACTION DESC -->
-            <b-list-group-item class="sticky-top d-flex align-items-center" variant="dark">
+            <b-list-group-item class="sticky-top d-flex align-items-center">
               <div>
                 <strong>{{ $t('action') }}:</strong>
                 {{ action.uri | readableUri }}
@@ -40,9 +44,10 @@
             </b-list-group-item>
 
             <!-- ACTION MESSAGE -->
-            <b-list-group-item v-for="({ type, text }, j) in action.messages" :key="j">
-              <icon iname="comment" :class="'text-' + type" /> <span v-html="text" />
-            </b-list-group-item>
+            <b-list-group-item
+              v-for="({ type, text }, j) in action.messages" :key="j"
+              :variant="type" v-html="text"
+            />
           </b-list-group>
         </b-list-group-item>
       </b-collapse>
@@ -63,7 +68,8 @@ export default {
 
   data () {
     return {
-      open: false
+      open: false,
+      openedByWaiting: false
     }
   },
 
@@ -80,10 +86,32 @@ export default {
     'lastAction.messages' () {
       if (!this.open) return
       this.$nextTick(this.scrollToLastAction)
+    },
+
+    waiting (waiting) {
+      if (waiting && !this.open) {
+        // Open the history while waiting for the server's response to display WebSocket messages.
+        this.open = true
+        this.openedByWaiting = true
+        const history = this.$refs.history
+        this.$nextTick().then(() => {
+          history.style.height = ''
+          history.classList.add('with-max')
+        })
+      } else if (!waiting && this.openedByWaiting) {
+        // Automaticly close the history if it was not opened before the request
+        setTimeout(() => {
+          // Do not close it if the history was enlarged during the action
+          if (!history.style || history.style.height === '') {
+            this.open = false
+          }
+          this.openedByWaiting = false
+        }, 500)
+      }
     }
   },
 
-  computed: mapGetters(['history', 'lastAction']),
+  computed: mapGetters(['history', 'lastAction', 'waiting']),
 
   methods: {
     scrollToLastAction () {
@@ -93,6 +121,57 @@ export default {
         const lastItem = lastActionGroup.lastElementChild || lastActionGroup
         historyElem.scrollTop = lastItem.offsetTop
       }
+    },
+
+    onHistoryBarClick (e) {
+      const history = this.$refs.history
+      let mousePos = e.clientY
+
+      const onMouseMove = ({ clientY }) => {
+        if (!this.open) {
+          history.style.height = '0px'
+          this.open = true
+        }
+        const currentHeight = history.offsetHeight
+        const move = mousePos - clientY
+        const nextSize = currentHeight + move
+        if (nextSize < 10 && nextSize < currentHeight) {
+          // Close the console and reset its size if the user reduce it to less than 10px.
+          mousePos = e.clientY
+          history.style.height = ''
+          onMouseUp()
+        } else {
+          history.style.height = nextSize + 'px'
+          // Simulate scroll when reducing the box so the content doesn't move
+          if (nextSize < currentHeight) {
+            history.scrollBy(0, -move)
+          }
+          mousePos = clientY
+        }
+      }
+
+      // Delay the mouse move listener to distinguish a click from a drag.
+      const listenToMouseMove = setTimeout(() => {
+        history.style.height = history.offsetHeight + 'px'
+        history.classList.remove('with-max')
+        window.addEventListener('mousemove', onMouseMove)
+      }, 200)
+
+      const onMouseUp = () => {
+        // Toggle opening if no mouse movement
+        if (mousePos === e.clientY) {
+          // add a max-height class if the box's height is not custom
+          if (!history.style.height) {
+            history.classList.add('with-max')
+          }
+          this.open = !this.open
+        }
+        clearTimeout(listenToMouseMove)
+        window.removeEventListener('mousemove', onMouseMove)
+        window.removeEventListener('mouseup', onMouseUp)
+      }
+
+      window.addEventListener('mouseup', onMouseUp)
     }
   },
 
@@ -111,7 +190,7 @@ export default {
 <style lang="scss" scoped>
 #console {
   position: sticky;
-  z-index: 5;
+  z-index: 15;
   bottom: 0;
 
   margin-left: -1.5rem;
@@ -127,14 +206,28 @@ export default {
   }
 }
 
-#history {
-  overflow-y: auto;
-  max-height: 30vh;
-}
-
-#collapse {
+#console-collapse {
   // disable collapse animation
   transition: none !important;
+}
+
+#history {
+  overflow-y: auto;
+
+  &.with-max {
+    max-height: 30vh;
+  }
+
+  // Used to display only the last message of the last action while an action is triggered
+  // and console was not opened.
+  &.with-max.show-last {
+    & > :not(:last-child) {
+      display: none;
+    }
+    & > :last-child > :not(:last-child) {
+      display: none;
+    }
+  }
 }
 
 .list-group-item {
