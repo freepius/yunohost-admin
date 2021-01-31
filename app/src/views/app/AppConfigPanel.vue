@@ -49,7 +49,7 @@
 // FIXME needs test and rework
 import api from '@/api'
 import { formatI18nField, formatYunoHostArgument } from '@/helpers/yunohostArguments'
-import { objectToParams } from '@/helpers/commons'
+import { objectToURLParams } from '@/helpers/commons'
 
 export default {
   name: 'AppConfigPanel',
@@ -108,7 +108,7 @@ export default {
       }
 
       // FIXME not tested at all, route is currently broken
-      api.post(`apps/${this.id}/config`, { args: objectToParams(args) }).then(response => {
+      api.post(`apps/${this.id}/config`, { args: objectToURLParams(args) }).then(response => {
         console.log('SUCCESS', response)
       }).catch(err => {
         console.log('ERROR', err)

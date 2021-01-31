@@ -5,7 +5,7 @@
 
 import store from '@/store'
 import { handleResponse } from './handlers'
-import { objectToParams } from '@/helpers/commons'
+import { objectToBody } from '@/helpers/commons'
 
 /**
  * A digested fetch response as an object, a string or an error.
@@ -54,7 +54,7 @@ export default {
    * @param {string} [data={}] - data to send as body for 'POST', 'PUT' and 'DELETE' methods.
    * @return {Promise<Response>} Promise that resolve a fetch `Response`.
    */
-  async fetch (method, uri, data = {}) {
+  async fetch (method, uri, data = {}, { asFormData = false } = {}) {
     // Open a websocket connection that will dispatch messages received.
     // FIXME add ability to do not open it
     await this.openWebSocket()
@@ -68,7 +68,7 @@ export default {
     return fetch('/yunohost/api/' + uri, {
       ...this.options,
       method,
-      body: objectToParams(data, { addLocale: true }, true)
+      body: objectToBody(data, { asFormData, addLocale: true })
     })
   },
 
@@ -99,8 +99,8 @@ export default {
    * @param {string} [data={}] - data to send as body.
    * @return {Promise<module:api~DigestedResponse>} Promise that resolve the api responses as an array.
    */
-  post (uri, data = {}) {
-    return this.fetch('POST', uri, data).then(response => handleResponse(response, 'POST'))
+  post (uri, data = {}, options) {
+    return this.fetch('POST', uri, data, options).then(response => handleResponse(response, 'POST'))
   },
 
   /**
@@ -110,8 +110,8 @@ export default {
    * @param {string} [data={}] - data to send as body.
    * @return {Promise<module:api~DigestedResponse>} Promise that resolve the api responses as an array.
    */
-  put (uri, data = {}) {
-    return this.fetch('PUT', uri, data).then(response => handleResponse(response, 'PUT'))
+  put (uri, data = {}, options) {
+    return this.fetch('PUT', uri, data, options).then(response => handleResponse(response, 'PUT'))
   },
 
   /**
@@ -121,7 +121,7 @@ export default {
    * @param {string} [data={}] - data to send as body.
    * @return {Promise<('ok'|Error)>} Promise that resolve the api responses as an array.
    */
-  delete (uri, data = {}) {
-    return this.fetch('DELETE', uri, data).then(response => handleResponse(response, 'DELETE'))
+  delete (uri, data = {}, options) {
+    return this.fetch('DELETE', uri, data, options).then(response => handleResponse(response, 'DELETE'))
   }
 }
