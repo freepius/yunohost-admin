@@ -429,5 +429,7 @@
     "revert_to_selfsigned_cert_message": "If you really want to, you can reinstall a self-signed certificate. (Not recommended)",
     "revert_to_selfsigned_cert": "Revert to a self-signed certificate",
     "purge_user_data_checkbox": "Purge {name}'s data? (This will remove the content of its home and mail directories.)",
-    "purge_user_data_warning": "Purging user's data is not reversible. Be sure you know what you're doing!"
+    "purge_user_data_warning": "Purging user's data is not reversible. Be sure you know what you're doing!",
+    "ynh-users-groups_title": "Management of users, groups and permissions",
+    "ynh-users-groups_backToYunohost": "Yunohost Home"
 }

@@ -52,13 +52,18 @@ module.exports = {
       }
     }
   },
-  publicPath: '/yunohost/admin',
+  publicPath: '/ynh-users-groups',
   devServer: {
     https: true,
     disableHostCheck: true,
     proxy: {
       '^/yunohost': {
-        target: `https://${process.env.VUE_APP_IP}`,
+        target: 'https://yuno.local',
+        ws: true,
+        logLevel: 'debug'
+      },
+      '^/ynh-users-groups/api/': {
+        target: 'https://yuno.local',
         ws: true,
         logLevel: 'debug'
       }

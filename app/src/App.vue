@@ -8,6 +8,7 @@
           exact exact-active-class="active"
         >
           <img alt="Yunohost logo" src="./assets/logo.png">
+          <strong>{{ $t('ynh-users-groups_title') }}</strong>
         </b-navbar-brand>
 
         <b-navbar-nav class="ml-auto">
@@ -16,13 +17,13 @@
               href="/yunohost/sso"
               variant="primary" size="sm" block
             >
-              {{ $t('user_interface_link') }} <icon iname="user" />
+              {{ $t('ynh-users-groups_backToYunohost') }} <icon iname="home" />
             </b-button>
           </li>
 
-          <li class="nav-item" v-show="connected">
+          <li class="nav-item">
             <b-button
-              @click.prevent="logout"
+              href="/yunohost/sso/?action=logout"
               variant="outline-dark" block size="sm"
             >
               {{ $t('logout') }} <icon iname="sign-out" />
@@ -53,7 +54,7 @@
     <footer class="py-3 mt-auto">
       <nav>
         <b-nav class="justify-content-center">
-          <b-nav-item href="https://yunohost.org/docs" target="_blank" link-classes="text-secondary">
+          <b-nav-item href="https://yunohost.org/#/groups_and_permissions" target="_blank" link-classes="text-secondary">
             <icon iname="book" /> {{ $t('footer.documentation') }}
           </b-nav-item>
           <b-nav-item href="https://yunohost.org/help" target="_blank" link-classes="text-secondary">
@@ -166,6 +167,11 @@ header {
 
     img {
         width: 70px;
+    }
+
+    strong {
+      padding-left: 1rem;
+      font-weight: 400;
     }
 
     .navbar-nav {

@@ -37,7 +37,7 @@ export default {
    */
   openWebSocket () {
     return new Promise(resolve => {
-      const ws = new WebSocket(`wss://${store.getters.host}/yunohost/api/messages`)
+      const ws = new WebSocket(`wss://${store.getters.host}/ynh-users-groups/api/messages`)
       ws.onmessage = ({ data }) => store.dispatch('DISPATCH_MESSAGE', JSON.parse(data))
       // ws.onclose = (e) => {}
       ws.onopen = resolve
@@ -61,11 +61,11 @@ export default {
 
     if (method === 'GET') {
       const localeQs = `${uri.includes('?') ? '&' : '?'}locale=${store.getters.locale}`
-      return fetch('/yunohost/api/' + uri + localeQs, this.options)
+      return fetch('/ynh-users-groups/api/' + uri + localeQs, this.options)
     }
 
     store.dispatch('WAITING_FOR_RESPONSE', [uri, method])
-    return fetch('/yunohost/api/' + uri, {
+    return fetch('/ynh-users-groups/api/' + uri, {
       ...this.options,
       method,
       body: objectToParams(data, { addLocale: true })

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import routes from './routes'
+import routes from './routes-ynh-users-groups'
 import store from '@/store'
 
 Vue.use(VueRouter)

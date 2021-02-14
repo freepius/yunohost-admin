@@ -307,5 +307,7 @@
     "permission_show_tile_enabled": "Montrer la tuile dans le portail utilisateur",
     "permission_main": "Permission principale",
     "permission_corresponding_url": "URL correspondante",
-    "app_manage_label_and_tiles": "Gérer les étiquettes et les tuiles"
+    "app_manage_label_and_tiles": "Gérer les étiquettes et les tuiles",
+    "ynh-users-groups_title": "Gestion des utilisateurs, groupes et permissions",
+    "ynh-users-groups_backToYunohost": "Accueil Yunohost"
 }

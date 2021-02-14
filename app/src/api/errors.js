@@ -8,7 +8,7 @@ import i18n from '@/i18n'
 class APIError extends Error {
   constructor (method, { url, status, statusText }, message) {
     super(message || i18n.t('error_server_unexpected'))
-    this.uri = new URL(url).pathname.replace('/yunohost', '')
+    this.uri = new URL(url).pathname.replace('/ynh-uers-groups', '')
     this.method = method
     this.code = status
     this.status = statusText
