@@ -27,13 +27,17 @@ const router = new VueRouter({
   }
 })
 
-router.beforeEach((to, from, next) => {
-  // Allow if connected or route is not protected
-  if (store.getters.connected || to.meta.noAuth) {
-    next()
-  } else {
-    store.dispatch('DISCONNECT', to)
-  }
-})
+/**
+ * ynh-users-groups: at this step, the user is already connected (via the SSO).
+ * So he can directly use this Yunohost application, without this admin extra connection.
+ */
+// router.beforeEach((to, from, next) => {
+//   // Allow if connected or route is not protected
+//   if (store.getters.connected || to.meta.noAuth) {
+//     next()
+//   } else {
+//     store.dispatch('DISCONNECT', to)
+//   }
+// })
 
 export default router
